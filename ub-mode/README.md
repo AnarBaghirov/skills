@@ -1,20 +1,156 @@
-# ub-mode
+# ub-mode — принципы разработки
 
-`ub-mode` is an agent skill that enforces disciplined software engineering principles when writing or changing code. It is loosely based on portions of [@poteto](https://github.com/poteto)'s rules (`poteto-mode` / `pstack`), reduced and paired with deterministic quality-gate tools:
+[Навык](SKILL.md) задаёт порядок работы при написании и изменении кода: сначала получить работающий результат, затем улучшить его и завершить работу проверками и небольшими коммитами.
 
-1. **First Make it Work** — Laziness Protocol, Foundational Thinking, TDD, Redesign From First Principles, Attack the Premise, Subtract Before You Add, Outcome-Oriented Execution, Build the Lever, and Architecture (Model the Domain, Boundary Discipline, Type System Discipline, Make Operations Idempotent, Separate Before Serializing Shared State).
-2. **Then Make it Right** — Fix Root Causes, Sequence Work into Verifiable Units, Test Behavior (Not Implementation), [Crapper](https://github.com/unclebob/crapper) (`CRAP < 10`), [Dryer](https://github.com/unclebob/dryer) (duplication `< 0.8`), [Mutator](https://github.com/unclebob/mutator) (cover the uncovered, kill the survivors, delete dead code), and Refactoring.
-3. **Practice** — Keep a Log, Guard the Context Window, Worktree Cleanup, and Commit and Push in small ordered commits.
+Автор — [unclebob](https://github.com/unclebob/ub-mode). Часть принципов опирается на правила [@poteto](https://github.com/poteto) (`poteto-mode` / `pstack`).
 
-## Companion Tool Repositories
+## Как устроен навык
 
-`ub-mode` relies on deterministic quality-gate tools to enforce structure, complexity, duplication, and test thoroughness:
+Три группы принципов:
 
-- [unclebob/crapper](https://github.com/unclebob/crapper) — Computes cyclomatic complexity, test coverage, and CRAP score per function so every function stays under the CRAP threshold (`< 10`).
-- [unclebob/dryer](https://github.com/unclebob/dryer) — Detects structural code duplication so duplicate blocks (`>= 0.8` similarity) are eliminated.
-- [unclebob/mutator](https://github.com/unclebob/mutator) — Runs mutation testing to expose uncovered code and surviving mutants that tests fail to catch.
-- [unclebob/uml-viewer](https://github.com/unclebob/uml-viewer) — Visualizes components, coverage, CRAP, mutation scores, and dependency directions.
+1. **Сначала заставь работать — First Make it Work.** Делай минимальное изменение, которое решает задачу; сначала продумывай данные, затем логику. Начинай с падающего теста, если можно написать содержательный тест. Пересматривай исходные допущения, убирай лишнюю сложность, моделируй предметную область и проверяй данные на входе. Избегай лишнего общего изменяемого состояния.
+2. **Затем сделай правильно — Then Make it Right.** Исправляй причины ошибок, двигайся небольшими проверяемыми шагами, тестируй поведение и сохраняй его при рефакторинге. Проверяй сложность функций, дублирование и качество тестов с помощью Crapper, Dryer и Mutator.
+3. **Соблюдай рабочие практики — Practice.** Веди журнал действий и причин, береги контекст, освобождай ненужные рабочие деревья Git после проверки и делай небольшие последовательные коммиты. Исходный навык также предписывает отправлять изменения в основную ветку в конце работы; при вызове укажите ограничения своего проекта на коммиты и отправку изменений.
 
-## Installation
+Полные инструкции находятся в [SKILL.md](SKILL.md). Этот файл сохранён на английском языке без изменений; README переведён и дополнен для этого репозитория.
 
-Copy `SKILL.md` into your agent's skills directory as `ub-mode/SKILL.md` (for example `~/.grok/skills/ub-mode/SKILL.md`, `~/.claude/skills/ub-mode/SKILL.md`, or `~/.cursor/skills/ub-mode/SKILL.md`), then invoke `/ub-mode`.
+## Установка в Codex
+
+### Через skill-installer
+
+Отправьте в чат Codex:
+
+```text
+$skill-installer Установи навык ub-mode из https://github.com/AnarBaghirov/skills/tree/master/ub-mode
+```
+
+Если навык не появился, перезапустите Codex.
+
+### Вручную: macOS и Linux
+
+Понадобится Git. Если репозиторий ещё не клонирован, выполните:
+
+```sh
+git clone https://github.com/AnarBaghirov/skills.git "$HOME/codex-skills"
+```
+
+Если вы уже устанавливали `clear-writing-ru` из этого репозитория, используйте ту же копию и сначала обновите её:
+
+```sh
+git -C "$HOME/codex-skills" pull --ff-only
+```
+
+Затем создайте ссылку в пользовательской папке навыков:
+
+```sh
+mkdir -p "$HOME/.agents/skills" &&
+ln -s "$HOME/codex-skills/ub-mode" "$HOME/.agents/skills/ub-mode"
+```
+
+Путь `~/.agents/skills/ub-mode` должен быть свободен. Если навык уже установлен, перейдите к разделу «Обновление». Сохраните папку `~/codex-skills`: ссылка указывает на файлы внутри неё.
+
+Для установки только в одном проекте скопируйте папку `ub-mode` целиком в `.agents/skills/` проекта.
+
+Папки обнаружения навыков описаны в [официальной документации OpenAI](https://learn.chatgpt.com/docs/build-skills).
+
+## Установка в Claude Code
+
+Используется та же папка `ub-mode` с файлом `SKILL.md`.
+
+Если репозиторий ещё не клонирован:
+
+```sh
+git clone https://github.com/AnarBaghirov/skills.git "$HOME/codex-skills"
+```
+
+Если копия уже есть, обновите её командой `git -C "$HOME/codex-skills" pull --ff-only`. Затем создайте ссылку:
+
+```sh
+mkdir -p "$HOME/.claude/skills" &&
+ln -s "$HOME/codex-skills/ub-mode" "$HOME/.claude/skills/ub-mode"
+```
+
+Путь `~/.claude/skills/ub-mode` должен быть свободен. Сохраните клонированный репозиторий: ссылка указывает на его файлы.
+
+Для одного проекта скопируйте папку `ub-mode` целиком в `.claude/skills/` проекта. Вызовите навык командой `/ub-mode` и опишите задачу.
+
+Подробнее — в [документации Claude Code](https://code.claude.com/docs/en/skills).
+
+## Установка в Claude: веб, Desktop и Cowork
+
+1. Скачайте репозиторий через **Code → Download ZIP** и распакуйте его.
+2. Создайте отдельный ZIP-архив папки `ub-mode`. В корне архива должна находиться папка `ub-mode`, внутри неё — `SKILL.md` и `README.md`.
+3. Откройте **Customize → Skills → + → Create skill → Upload a skill**, загрузите архив и включите навык.
+4. В **Settings → Capabilities** включите создание и редактирование файлов, если оно отключено.
+
+Затем попросите: «Используй навык ub-mode» — и приложите код или описание задачи. Для выполнения проверок среде нужен доступ к проекту и соответствующим инструментам.
+
+Подробнее — в [инструкции Claude](https://support.claude.com/en/articles/12512180-use-skills-in-claude).
+
+## Дополнительные инструменты
+
+Установка навыка добавляет инструкции. Программы для проверок нужно установить отдельно и сделать доступными агенту в среде проекта. Требования и способы запуска приведены в репозиториях инструментов:
+
+- [Crapper](https://github.com/unclebob/crapper) — вычисляет цикломатическую сложность, покрытие тестами и показатель CRAP для функций. Цель навыка — CRAP ниже 10.
+- [Dryer](https://github.com/unclebob/dryer) — ищет структурное дублирование кода. Навык требует устранять дубли со сходством 0,8 и выше.
+- [Mutator](https://github.com/unclebob/mutator) — проверяет тесты, внося изменения в код и выявляя те, которые тесты не обнаружили. Навык предписывает покрывать непроверенный код, устранять выжившие мутации и удалять мёртвый код.
+- [UML Viewer](https://github.com/unclebob/uml-viewer) — показывает компоненты, зависимости и показатели покрытия, CRAP и мутационного тестирования; указан в исходном README как сопутствующий инструмент.
+
+Если инструмент недоступен, укажите это в задаче и попросите агента перечислить невыполненные проверки. Само подключение навыка не означает, что проверки выполнены.
+
+## Использование
+
+В Codex CLI и IDE используйте `$ub-mode`, в Claude Code — `/ub-mode`. В интерфейсе с выбором навыков выберите `ub-mode` или попросите применить его по имени.
+
+**Изменить код:**
+
+```text
+$ub-mode Добавь проверку входных данных в обработчик регистрации.
+Сначала изучи структуру проекта и существующие тесты.
+Сохрани текущее поведение для корректных запросов.
+В конце перечисли изменения и результаты проверок.
+Коммиты и отправку изменений не выполняй.
+```
+
+**Исправить ошибку:**
+
+```text
+$ub-mode Исправь ошибку: повторная отправка запроса создаёт второй заказ.
+Воспроизведи проблему тестом, найди причину и проверь исправление.
+Укажи, какие инструменты проверки доступны и какие проверки выполнены.
+Коммиты и отправку изменений не выполняй.
+```
+
+**Провести рефакторинг:**
+
+```text
+$ub-mode Упрости модуль расчёта скидок.
+Сначала зафиксируй его поведение тестами, затем убери дублирование.
+Покажи, чем подтверждено сохранение поведения.
+Коммиты и отправку изменений не выполняй.
+```
+
+В Claude Code замените `$ub-mode` на `/ub-mode`. Приложите контекст задачи и укажите команды тестирования, доступные инструменты и правила работы с Git, если они известны.
+
+## Обновление
+
+Если навык подключён ссылкой на `~/codex-skills`, обновите общую копию:
+
+```sh
+git -C "$HOME/codex-skills" pull --ff-only
+```
+
+Ссылки Codex и Claude Code будут указывать на обновлённые файлы. Команда обновляет весь репозиторий, включая другие навыки. Если Git сообщает о локальных изменениях или расхождении веток, сначала разберите их; не удаляйте свои правки ради обновления.
+
+Если навык установлен через `skill-installer` или скопирован вручную, обновление `~/codex-skills` не меняет эту отдельную копию: перенесите в неё актуальные файлы, предварительно сохранив собственные правки. Для загруженного в Claude ZIP подготовьте новый архив из обновлённой папки и замените загруженную версию.
+
+## Состав навыка
+
+- [SKILL.md](SKILL.md) — исходные инструкции и описание условий вызова.
+- [README.md](README.md) — описание, установка и примеры использования на русском языке.
+
+[Все навыки репозитория](../README.md)
+
+## Источник и лицензия
+
+Исходный навык: [unclebob/ub-mode](https://github.com/unclebob/ub-mode). В скопированной версии исходного репозитория отдельная лицензия не указана. Лицензия MIT этого репозитория не устанавливает лицензию на исходные материалы `ub-mode`.
